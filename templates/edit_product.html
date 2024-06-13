@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Image</h1>
+    <form action="/save-products" method="post" enctype="multipart/form-data">
+        <input type="hidden" value="{{ old_name }}" id="vname" name="old_name">-->
+        <input type="hidden" value="{{ old_price }}" id="vprice" name="old_price">
+       <input type="text" value="{{ product.name }}" name="name" placeholder="Product name" >
+       <textarea id="description" name="description" placeholder="Product Description" >{{ product.des }}</textarea>
+       <input type="text" value="{{ product.price }}" name="price" placeholder="Price" >
+       <input type="text" value="{{ product.quantity }}" name="quantity" placeholder="quantity" >
+       <input type="number" value="{{ product.weight }}" name="weight" placeholder="0.00kg">
+       <input type="file" id="fileInput" name="image" accept="image/*" >
+       <input type="text" value="{{ product.link }}" name="link" placeholder="https://googledrive.com">
+       <h1>Variant Data</h1>
+       <div id="variants-container"></div>
+       <div id="hidden"></div>
+<!--       <input type="hidden" id="vname" name="vname">-->
+<!--        <input type="hidden" id="vprice" name="vprice">-->
+<!--        <input type="hidden" id="vquantity" name="vquantity">-->
+<!--        <input type="hidden" id="vsize" name="vsize">-->
+<!--       <input type="hidden" id="vtype" name="vtype">-->
+<!--        <input type="hidden" id="vcolor" name="vcolor">-->
+<!--        <input type="hidden" id="vimage" name="vimage">-->
+<!--       <select name="sub">-->
+<!--        <option value="t-shirt" {% if product.sub == 't-shirt' %}selected{% endif %}>T-shirt</option>-->
+<!--        <option value="hoodies" {% if product.sub == 'hoodies' %}selected{% endif %}>Hoodies</option>-->
+<!--        <option value="sweatshirt" {% if product.sub == 'sweatshirt' %}selected{% endif %}>Sweatshirt</option>-->
+<!--        </select>-->
+        <select name="sub">
+        {% for sub in subs %}
+            <option value="{{ sub }}" {% if product.sub == sub %}selected{% endif %}>
+                {{ sub }}
+            </option>
+        {% endfor %}
+    </select>
+       <select name="category">
+        {% for category in categories %}
+            <option value="{{ category }}" {% if product.category == category %}selected{% endif %}>
+                {{ category }}
+            </option>
+        {% endfor %}
+    </select>
+       <select name="status">
+        <option value="draft" {% if product.status == 'draft' %}selected{% endif %}>Draft</option>
+        <option value="active" {% if product.status == 'active' %}selected{% endif %}>Active</option>
+        <option value="archived" {% if product.status == 'archived' %}selected{% endif %}>Archived</option>
+        </select>
+       <button type="submit">Upload</button>
+    </form>
+    <div id="imageContainer"></div>
+
+    <h1>variant</h1>
+    <form action="/varian" method="post" enctype="multipart/form-data">
+       <input type="text" name="vname" placeholder="vname" required>
+       <input type="text" name="vsize" placeholder="size" required>
+       <input type="text" name="vtype" placeholder="vtype" required>
+       <input type="text" name="vcolor" placeholder="vcolor">
+       <input type="text" name="vquantity" placeholder="vquantity" required>
+       <input type="text" name="vprice" placeholder="vprice">
+       <input type="file" name="vimage" accept="image/*" required>
+       <button type="submit">Upload</button>
+    </form>
+     <script>
+        // Assuming product_image is passed to the template as a variable
+        const productImage = "{{ product.image }}";
+
+        // Create a new img element for the initial product image
+        const imgElement = document.createElement('img');
+        imgElement.src = `data:image/jpeg;base64,${productImage}`;
+        imgElement.alt = 'Product Image';
+        imgElement.style.maxWidth = '300px'; // Set max width (adjust as needed)
+        imgElement.style.maxHeight = '300px'; // Set max height (adjust as needed)
+
+        // Append the initial img element to the imageContainer div
+        const imageContainer = document.getElementById('imageContainer');
+        imageContainer.appendChild(imgElement);
+
+        // JavaScript code to replace the image with the uploaded one
+        const fileInput = document.getElementById('fileInput');
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                const imageUrl = URL.createObjectURL(file);
+
+                // Create a new img element for the selected image
+                const newImgElement = document.createElement('img');
+                newImgElement.src = imageUrl;
+                newImgElement.alt = 'New Product Image';
+                newImgElement.style.maxWidth = '300px'; // Set max width (adjust as needed)
+                newImgElement.style.maxHeight = '300px'; // Set max height (adjust as needed)
+
+                // Remove the old image and append the new one
+                imageContainer.innerHTML = '';
+                imageContainer.appendChild(newImgElement);
+            }
+        });
+    </script>
+    <script>
+        fetch('/variants')
+            .then(response => response.json())
+            .then(data => {
+                // Display variant data dynamically in a table
+                const variantsContainer = document.getElementById('variants-container');
+                const table = document.createElement('table');
+
+                // Create table header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const headers = ['Image','Name', 'Price', 'Quantity', 'Size'];
+                headers.forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // Create table body
+                const tbody = document.createElement('tbody');
+                const variantName= []
+                const variantPrice= []
+                const variantQuantity = []
+                const variantSize = []
+                const variantType = []
+                const variantColor = []
+                const variantImage = []
+
+                data.forEach(variant => {
+                    const row = document.createElement('tr');
+                    const img = document.createElement('img');
+                    const imageCell = document.createElement('td');
+                    img.src = `data:image/jpeg;base64,${variant.vimage}`;
+                    img.alt = "Product Image";
+                    img.style.width = '50px';  // Set the width of the image
+                    img.style.height = 'auto';  // Maintain aspect ratio
+                    imageCell.appendChild(img);
+                    row.appendChild(imageCell);
+                    ['vname', 'vprice', 'vquantity', 'vsize'].forEach(key => {
+                        const cell = document.createElement('td');
+                        cell.textContent = variant[key];
+                        row.appendChild(cell);
+                    });
+                    tbody.appendChild(row);
+                    variantName.push({
+                        vname: variant['vname'],
+                        })
+                    variantType.push({
+                        vtype: variant['vtype'],
+                        })
+                    variantPrice.push({
+                        vprice: variant['vprice'],
+                        })
+                    variantQuantity.push({
+                        vquantity: variant['vquantity'],
+                        })
+                    variantSize.push({
+                        vsize: variant['vsize'],
+                        })
+                    variantColor.push({
+                        vcolor: variant['vcolor'],
+                        })
+                    variantImage.push({
+                        vimage: variant['vimage'],
+                        })
+                    // Set values of hidden input fields
+<!--                    document.getElementById('vname').value = variant['vname'];-->
+<!--                    document.getElementById('vprice').value = variant['vprice'];-->
+<!--                    document.getElementById('vquantity').value = variant['vquantity'];-->
+<!--                    document.getElementById('vsize').value = variant['vsize'];-->
+<!--                    document.getElementById('vcolor').value = variant['vcolor'];-->
+<!--                    document.getElementById('vimage').value = variant['vimage'];-->
+<!--                    document.getElementById('vtype').value = variant['vtype'];-->
+                });
+                const hiddenDiv = document.getElementById('hidden')
+                    const hiddenvname = document.createElement('input');
+                    hiddenvname.type = 'hidden';
+                    hiddenvname.name = 'vname';
+                    hiddenvname.value = JSON.stringify(variantName);
+                    hiddenDiv.appendChild(hiddenvname)
+                    const hiddenvsize = document.createElement('input');
+                    hiddenvsize.type = 'hidden';
+                    hiddenvsize.name = 'vsize';
+                    hiddenvsize.value = JSON.stringify(variantSize);
+                    hiddenDiv.appendChild(hiddenvsize)
+                    const hiddenvtype = document.createElement('input');
+                    hiddenvtype.type = 'hidden';
+                    hiddenvtype.name = 'vtype';
+                    hiddenvtype.value = JSON.stringify(variantType);
+                    hiddenDiv.appendChild(hiddenvtype)
+                    const hiddenvcolor = document.createElement('input');
+                    hiddenvcolor.type = 'hidden';
+                    hiddenvcolor.name = 'vcolor';
+                    hiddenvcolor.value = JSON.stringify(variantColor);
+                    hiddenDiv.appendChild(hiddenvcolor)
+                    const hiddenvquantity = document.createElement('input');
+                    hiddenvquantity.type = 'hidden';
+                    hiddenvquantity.name = 'vquantity';
+                    hiddenvquantity.value = JSON.stringify(variantQuantity);
+                    hiddenDiv.appendChild(hiddenvquantity)
+                    const hiddenvprice = document.createElement('input');
+                    hiddenvprice.type = 'hidden';
+                    hiddenvprice.name = 'vprice';
+                    hiddenvprice.value = JSON.stringify(variantPrice);
+                    hiddenDiv.appendChild(hiddenvprice)
+                    const hiddenvimage = document.createElement('input');
+                    hiddenvimage.type = 'hidden';
+                    hiddenvimage.name = 'vimage';
+                    hiddenvimage.value = JSON.stringify(variantImage);
+                    hiddenDiv.appendChild(hiddenvimage)
+                table.appendChild(tbody);
+
+                variantsContainer.appendChild(table);
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send User ID Example</title>
+</head>
+<body>
+    <a href="#" id="sendUserIdLink">Click me to send User ID</a>
+
+    <script>
+        // Function to get a cookie value by name
+        function getCookie(name) {
+            let matches = document.cookie.match(new RegExp(
+                "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+            ));
+            return matches ? decodeURIComponent(matches[1]) : undefined;
+        }
+
+        // Read the user_id cookie
+        const userId = getCookie('user_id');
+        console.log("User ID from cookie:", userId);
+
+        document.getElementById('sendUserIdLink').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default link click behavior
+
+            // Send the userId to the backend
+            fetch(`/send_user_id?user_id=${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // Optionally, you can redirect to another page or perform some action
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

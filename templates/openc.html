@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar App</title>
+  <link rel="stylesheet" href="sty.css">
+  <style>
+    body {
+    font-family: Arial, sans-serif;
+  }
+
+  .calendar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td, th {
+    text-align: center;
+    padding: 10px;
+  }
+
+  .time-inputs {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+
+  .time-inputs label {
+    margin-bottom: 5px;
+  }
+
+  input[type="text"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    width: 100px;
+  }
+
+  #save-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    opacity: 0.5; /* Disable button initially */
+  }
+
+  #save-button:hover {
+    opacity: 1;
+  }
+
+  /* Style for selected day (can be customized) */
+  .selected {
+    background-color: #f0f0f0;
+  }
+  </style>
+</head>
+<body>
+  <form action="/close" method="post" >
+  <h1>Calendar</h1>
+  <div class="calendar-container">
+    <table id="calendar">
+        <thead>
+          <tr>
+            <th>Mon</th>
+            <th>Tue</th>
+            <th>Wed</th>
+            <th>Thu</th>
+            <th>Fri</th>
+            <th>Sat</th>
+            <th>Sun</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+                <input type="checkbox" class="day-checkbox" {% if omon and cmon %}checked{% endif %}>
+                <input type="text" value="{{ omon }}" id="omon" placeholder="opening" name="omon">
+                <input type="text" value="{{ cmon }}" id="cmon" placeholder="closing" name="cmon">
+              </td>
+              <td>
+                 <input type="checkbox" class="day-checkbox" {% if otues and ctues %}checked{% endif %}>
+                <input type="text" value="{{ otues }}" id="otues" placeholder="opening" name="otues">
+                <input type="text" value="{{ ctues }}" id="ctues" placeholder="closing" name="ctues">
+              </td>
+              <td>
+                <input type="checkbox" class="day-checkbox" {% if owed and cwed %}checked{% endif %}>
+                <input type="text" value="{{ owed }}" id="owed" placeholder="opening" name="owed">
+                <input type="text" value="{{ cwed }}" id="cwed" placeholder="closing" name="cwed">
+              </td>
+              <td>
+                <input type="checkbox" class="day-checkbox" {% if othur and cthur %}checked{% endif %}>
+                <input type="text" value="{{ othur }}" id="othur" placeholder="opening" name="othur">
+                <input type="text" value="{{ cthur }}" id="cthur" placeholder="closing" name="cthur">
+              </td>
+              <td>
+                <input type="checkbox" class="day-checkbox" {% if ofri and cfri %}checked{% endif %}>
+                <input type="text" value="{{ ofri }}" id="ofri" placeholder="opening" name="ofri">
+                <input type="text" value="{{ cfri }}" id="cfri" placeholder="closing" name="cfri">
+              </td>
+              <td>
+                <input type="checkbox" class="day-checkbox" {% if osat and csat %}checked{% endif %}>
+                <input type="text" value="{{ osat }}" id="osat" placeholder="opening" name="osat">
+                <input type="text" value="{{ csat }}" id="csat" placeholder="closing" name="csat">
+              </td>
+              <td>
+                <input type="checkbox" class="day-checkbox" {% if osun and csun %}checked{% endif %}>
+                <input type="text" value="{{ osun }}" id="osun" placeholder="opening" name="osun">
+                <input type="text" value="{{ csun }}" id="csun" placeholder="closing" name="csun">
+              </td>
+          </tr>
+          </tbody>
+      </table>
+    <button type="submit" id="save-button" >Save Times</button>
+  </div>
+  </form>
+  <script>
+    function toggleFields(checkbox) {
+      var inputs = checkbox.parentNode.querySelectorAll('input[type="text"]');
+      if (checkbox.checked) {
+        inputs.forEach(function(input) {
+          input.name = input.id;
+        });
+      } else {
+        inputs.forEach(function(input) {
+          input.name = '';
+        });
+      }
+    }
+
+    var checkboxes = document.querySelectorAll('.day-checkbox');
+    checkboxes.forEach(function(checkbox) {
+      checkbox.addEventListener('click', function() {
+        toggleFields(this);
+      });
+    });
+  </script>
+</body>
+</html>

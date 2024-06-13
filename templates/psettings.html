@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="/psettingsp" method="post" enctype="multipart/form-data">
+
+        <input type="text" value="{{ first }}" placeholder="first" class="input" name="first">
+        <input type="text" value="{{ last }}" placeholder="last" class="input" name="last">
+        <input type="text" value="{{ pemail }}" placeholder="bemail" class="input" name="email">
+        <input type="text" value="{{ phone }}" placeholder="phone" class="input" name="phone">
+        <select name="country">
+        <option value="Nigeria" {% if country == 'Nigeria' %}selected{% endif %}>Nigeria</option>
+        <option value="Ghana" {% if country == 'Ghana' %}selected{% endif %} >Ghana</option>
+        <option value="South-Africa" {% if country == 'South-Africa' %}selected{% endif %} >South-Africa</option>
+        <option value="kenya" {% if country == 'Kenya' %}selected{% endif %} >Kenya</option>
+        </select>
+
+    <button type="submit">Save</button>
+    </form>
+</body>
+</html>

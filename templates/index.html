@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Image</h1>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+       <input type="text" name="name" placeholder="Product name" required>
+       <textarea id="description" name="description" placeholder="Product Description" required></textarea>
+       <input type="text" name="price" placeholder="Price" required>
+       <input type="text" name="quantity" placeholder="quantity" required>
+       <input type="number" name="weight" placeholder="0.00kg">
+       <input type="file" name="image" accept="image/*" required>
+       <input type="text" name="link" placeholder="https://googledrive.com">
+       <h1>Variant Data</h1>
+       <div id="variants-container"></div>
+       <div id="hidden"></div>
+<!--       <input type="hidden" id="vname" name="vname">-->
+<!--        <input type="hidden" id="vprice" name="vprice">-->
+<!--        <input type="hidden" id="vquantity" name="vquantity">-->
+<!--        <input type="hidden" id="vsize" name="vsize">-->
+<!--       <input type="hidden" id="vtype" name="vtype">-->
+<!--        <input type="hidden" id="vcolor" name="vcolor">-->
+<!--        <input type="hidden" id="vimage" name="vimage">-->
+<!--       <select id="sub" name="sub">-->
+<!--        <option value="T-shirt">T-shirt</option>-->
+<!--        <option value="Hoodies">Hoodies</option>-->
+<!--        <option value="Sweatshirt">Sweatshirt</option>-->
+<!--        </select>-->
+        <select id="category" name="category">
+        {% for category in categories %}
+            <option value="{{ category }}">{{ category }}</option>
+                {{ category }}
+            </option>
+        {% endfor %}
+        </select>
+        <select id="sub" name="sub">
+        {% for sub in subs %}
+            <option value="{{ sub }}">{{ sub }}</option>
+                {{ sub }}
+            </option>
+        {% endfor %}
+        </select>
+<!--       <select id="category" name="category">-->
+<!--        <option value="Clothing">Clothing</option>-->
+<!--        <option value="Electronics">Electronics</option>-->
+<!--        <option value="Assesories">Assesories</option>-->
+<!--        <option value="Digital product">Digital Product</option>-->
+<!--        </select>-->
+       <select name="status">
+        <option value="draft">Draft</option>
+        <option value="active">Active</option>
+        <option value="archived">Archived</option>
+        </select>
+       <button type="submit">Upload</button>
+    </form>
+    <input type="text" id="newcat" name="newcat" placeholder="newcat" required>
+    <button id="addCategoryButton">Add Category</button>
+    <input type="text" id="newsub" name="newsub" placeholder="newsub" required>
+    <button id="addSubButton">Add Sub</button>
+    <div id="imageContainer"></div>
+
+    <h1>variant</h1>
+    <form action="/varian" method="post" enctype="multipart/form-data">
+       <input type="text" name="vname" placeholder="vname" required>
+       <input type="text" name="vsize" placeholder="size" required>
+       <input type="text" name="vtype" placeholder="vtype" required>
+       <input type="text" name="vcolor" placeholder="vcolor">
+       <input type="text" name="vquantity" placeholder="vquantity" required>
+       <input type="text" name="vprice" placeholder="vprice">
+       <input type="file" name="vimage" accept="image/*" required>
+       <button type="submit">Upload</button>
+    </form>
+    <script>
+        document.getElementById('addCategoryButton').addEventListener('click', function() {
+            // Get the new category from the input
+            const newCategory = document.getElementById('newcat').value;
+
+            if (newCategory.trim() !== '') {
+                // Create a new option element
+                const newOption = document.createElement('option');
+                newOption.value = newCategory;
+                newOption.textContent = newCategory;
+
+                // Add the new option to the dropdown
+                const categorySelect = document.getElementById('category');
+                categorySelect.appendChild(newOption);
+
+                // Clear the input field
+                document.getElementById('newcat').value = '';
+            }
+        });
+    </script>
+    <script>
+        document.getElementById('addSubButton').addEventListener('click', function() {
+            // Get the new category from the input
+            const newCategory = document.getElementById('newsub').value;
+
+            if (newCategory.trim() !== '') {
+                // Create a new option element
+                const newOption = document.createElement('option');
+                newOption.value = newCategory;
+                newOption.textContent = newCategory;
+
+                // Add the new option to the dropdown
+                const categorySelect = document.getElementById('sub');
+                categorySelect.appendChild(newOption);
+
+                // Clear the input field
+                document.getElementById('newsub').value = '';
+            }
+        });
+    </script>
+
+
+
+    <script>
+        // JavaScript code to display uploaded images without page refresh
+        const imageContainer = document.getElementById('imageContainer');
+        const fileInput = document.querySelector('input[type="file"]');
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            const imageUrl = URL.createObjectURL(file);
+            const imgElement = document.createElement('img');
+            imgElement.src = imageUrl;
+            imgElement.style.maxWidth = '300px'; // Set max width to 300px (adjust as needed)
+            imgElement.style.maxHeight = '300px'; // Set max height to 300px (adjust as needed)
+            imageContainer.appendChild(imgElement);
+        });
+    </script>
+    <script>
+        fetch('/variants')
+            .then(response => response.json())
+            .then(data => {
+                // Display variant data dynamically in a table
+                const variantsContainer = document.getElementById('variants-container');
+                const table = document.createElement('table');
+
+                // Create table header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const headers = ['Image','Name', 'Price', 'Quantity', 'Size'];
+                headers.forEach(headerText => {
+                    const th = document.createElement('th');
+                    th.textContent = headerText;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // Create table body
+                const tbody = document.createElement('tbody');
+                const variantName= []
+                const variantPrice= []
+                const variantQuantity = []
+                const variantSize = []
+                const variantType = []
+                const variantColor = []
+                const variantImage = []
+
+                data.forEach(variant => {
+                    const row = document.createElement('tr');
+                    const img = document.createElement('img');
+                    const imageCell = document.createElement('td');
+                    img.src = `data:image/jpeg;base64,${variant.vimage}`;
+                    img.alt = "Product Image";
+                    img.style.width = '50px';  // Set the width of the image
+                    img.style.height = 'auto';  // Maintain aspect ratio
+                    imageCell.appendChild(img);
+                    row.appendChild(imageCell);
+                    ['vname', 'vprice', 'vquantity', 'vsize'].forEach(key => {
+                        const cell = document.createElement('td');
+                        cell.textContent = variant[key];
+                        row.appendChild(cell);
+                    });
+                    tbody.appendChild(row);
+                    variantName.push({
+                        vname: variant['vname'],
+                        })
+                    variantType.push({
+                        vtype: variant['vtype'],
+                        })
+                    variantPrice.push({
+                        vprice: variant['vprice'],
+                        })
+                    variantQuantity.push({
+                        vquantity: variant['vquantity'],
+                        })
+                    variantSize.push({
+                        vsize: variant['vsize'],
+                        })
+                    variantColor.push({
+                        vcolor: variant['vcolor'],
+                        })
+                    variantImage.push({
+                        vimage: variant['vimage'],
+                        })
+                    // Set values of hidden input fields
+<!--                    document.getElementById('vname').value = variant['vname'];-->
+<!--                    document.getElementById('vprice').value = variant['vprice'];-->
+<!--                    document.getElementById('vquantity').value = variant['vquantity'];-->
+<!--                    document.getElementById('vsize').value = variant['vsize'];-->
+<!--                    document.getElementById('vcolor').value = variant['vcolor'];-->
+<!--                    document.getElementById('vimage').value = variant['vimage'];-->
+<!--                    document.getElementById('vtype').value = variant['vtype'];-->
+                });
+                const hiddenDiv = document.getElementById('hidden')
+                    const hiddenvname = document.createElement('input');
+                    hiddenvname.type = 'hidden';
+                    hiddenvname.name = 'vname';
+                    hiddenvname.value = JSON.stringify(variantName);
+                    hiddenDiv.appendChild(hiddenvname)
+                    const hiddenvsize = document.createElement('input');
+                    hiddenvsize.type = 'hidden';
+                    hiddenvsize.name = 'vsize';
+                    hiddenvsize.value = JSON.stringify(variantSize);
+                    hiddenDiv.appendChild(hiddenvsize)
+                    const hiddenvtype = document.createElement('input');
+                    hiddenvtype.type = 'hidden';
+                    hiddenvtype.name = 'vtype';
+                    hiddenvtype.value = JSON.stringify(variantType);
+                    hiddenDiv.appendChild(hiddenvtype)
+                    const hiddenvcolor = document.createElement('input');
+                    hiddenvcolor.type = 'hidden';
+                    hiddenvcolor.name = 'vcolor';
+                    hiddenvcolor.value = JSON.stringify(variantColor);
+                    hiddenDiv.appendChild(hiddenvcolor)
+                    const hiddenvquantity = document.createElement('input');
+                    hiddenvquantity.type = 'hidden';
+                    hiddenvquantity.name = 'vquantity';
+                    hiddenvquantity.value = JSON.stringify(variantQuantity);
+                    hiddenDiv.appendChild(hiddenvquantity)
+                    const hiddenvprice = document.createElement('input');
+                    hiddenvprice.type = 'hidden';
+                    hiddenvprice.name = 'vprice';
+                    hiddenvprice.value = JSON.stringify(variantPrice);
+                    hiddenDiv.appendChild(hiddenvprice)
+                    const hiddenvimage = document.createElement('input');
+                    hiddenvimage.type = 'hidden';
+                    hiddenvimage.name = 'vimage';
+                    hiddenvimage.value = JSON.stringify(variantImage);
+                    hiddenDiv.appendChild(hiddenvimage)
+                table.appendChild(tbody);
+
+                variantsContainer.appendChild(table);
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+</html>
