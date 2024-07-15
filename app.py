@@ -15,17 +15,16 @@ def reg():
     email = request.form['email']
     password = request.form['password']
     user_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, email))
-    response = make_response(render_template('done.html'))
+    response = make_response(jsonify({'message': 'Registration successful'}))
     response.set_cookie('user_id', user_id)
-
-    return response
+    return response, 200
 
 
 @app.route('/send_user_id', methods=['GET'])
 def receive_user_id():
     user_id = request.args.get('user_id')
     print(f"Received user_id: {user_id}")
-    return user_id
+    return "User ID received"
 
 
 if __name__ == '__main__':
