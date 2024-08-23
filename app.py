@@ -30,13 +30,13 @@ def receive_user_id():
 def home():
     return render_template('eula.html')
 @app.route('/domain')
-def home():
+def home1():
     return render_template('domain.html')
 @app.route('/privacy')
-def home():
+def home2():
     return render_template('privacy.html')
 @app.route('/connect')
-def home():
+def home3():
     return render_template('connect.html')
 
 
