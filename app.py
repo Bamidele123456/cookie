@@ -26,6 +26,19 @@ def receive_user_id():
     print(f"Received user_id: {user_id}")
     return "User ID received"
 
+@app.route('/eula')
+def home():
+    return render_template('eula.html')
+@app.route('/domain')
+def home():
+    return render_template('domain.html')
+@app.route('/privacy')
+def home():
+    return render_template('privacy.html')
+@app.route('/connect')
+def home():
+    return render_template('connect.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
